@@ -7,8 +7,15 @@ use strum_macros::EnumString;
 #[allow(non_camel_case_types)]
 pub enum ParametersType {
     bool(bool),
+    i16(i16),
     i32(i32),
+    i64(i64),
+    u8(u8),
+    u16(u16),
     u32(u32),
+    u64(u64),
+    f32(f32),
+    f64(f64),
     VecI32(Vec<i32>),
     VecU32(Vec<u32>),
     usize(usize),
@@ -24,12 +31,9 @@ pub fn parameters_json_to_map(json_input: &String) -> BTreeMap<String, Parameter
             for (key, value) in actor_desc_map {
                 let param = match value {
                     Value::Bool(bool) => ParametersType::bool(*bool),
-                    Value::Number(num) if num.is_u64() => {
-                        ParametersType::u32(num.as_u64().unwrap() as u32)
-                    }
-                    Value::Number(num) if num.is_i64() => {
-                        ParametersType::i32(num.as_i64().unwrap() as i32)
-                    }
+                    Value::Number(num) if num.is_u64() => ParametersType::u64(num.as_u64().unwrap()),
+                    Value::Number(num) if num.is_i64() => ParametersType::i64(num.as_i64().unwrap()),
+                    Value::Number(num) if num.is_f64() => ParametersType::f64(num.as_f64().unwrap()),
                     Value::Array(arr) if arr.iter().all(|x| x.is_u64()) => ParametersType::VecU32(
                         arr.iter().map(|x| x.as_u64().unwrap() as u32).collect(),
                     ),
@@ -56,12 +60,9 @@ pub fn arguments_json_to_map(json_input: &String) -> BTreeMap<String, Parameters
             for (key, value) in actor_desc_map {
                 let param = match value {
                     Value::Bool(bool) => ParametersType::bool(*bool),
-                    Value::Number(num) if num.is_u64() => {
-                        ParametersType::u32(num.as_u64().unwrap() as u32)
-                    }
-                    Value::Number(num) if num.is_i64() => {
-                        ParametersType::i32(num.as_i64().unwrap() as i32)
-                    }
+                    Value::Number(num) if num.is_u64() => ParametersType::u64(num.as_u64().unwrap()),
+                    Value::Number(num) if num.is_i64() => ParametersType::i64(num.as_i64().unwrap()),
+                    Value::Number(num) if num.is_f64() => ParametersType::f64(num.as_f64().unwrap()),
                     Value::Array(arr) if arr.iter().all(|x| x.is_u64()) => ParametersType::VecU32(
                         arr.iter().map(|x| x.as_u64().unwrap() as u32).collect(),
                     ),
@@ -85,8 +86,15 @@ pub fn parameters_map_to_json(map_input: BTreeMap<String, ParametersType>) -> St
     for (key, value) in map_input {
         let json_value = match value {
             ParametersType::bool(v) => Value::Bool(v),
+            ParametersType::i16(v) => Value::Number(v.into()),
             ParametersType::i32(v) => Value::Number(v.into()),
+            ParametersType::i64(v) => Value::Number(v.into()),
+            ParametersType::u8(v) => Value::Number(v.into()),
+            ParametersType::u16(v) => Value::Number(v.into()),
             ParametersType::u32(v) => Value::Number(v.into()),
+            ParametersType::u64(v) => Value::Number(v.into()),
+            ParametersType::f32(v) => Value::Number(serde_json::Number::from_f64(v as f64).unwrap()),
+            ParametersType::f64(v) => Value::Number(serde_json::Number::from_f64(v).unwrap()),
             ParametersType::VecI32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
             ParametersType::VecU32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
             ParametersType::usize(v) => Value::Number((v as u64).into()),
@@ -123,8 +131,15 @@ pub fn actor_function_request(
         for (key, value) in function_parameters_map {
             let json_value = match value {
                 ParametersType::bool(v) => Value::Bool(v),
+                ParametersType::i16(v) => Value::Number(v.into()),
                 ParametersType::i32(v) => Value::Number(v.into()),
+                ParametersType::i64(v) => Value::Number(v.into()),
+                ParametersType::u8(v) => Value::Number(v.into()),
+                ParametersType::u16(v) => Value::Number(v.into()),
                 ParametersType::u32(v) => Value::Number(v.into()),
+                ParametersType::u64(v) => Value::Number(v.into()),
+                ParametersType::f32(v) => Value::Number(serde_json::Number::from_f64(v as f64).unwrap()),
+                ParametersType::f64(v) => Value::Number(serde_json::Number::from_f64(v).unwrap()),
                 ParametersType::VecI32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
                 ParametersType::VecU32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
                 ParametersType::usize(v) => Value::Number((v as u64).into()),
@@ -158,8 +173,15 @@ pub fn add_actor_function_request(
         for (key, value) in function_parameters_map {
             let json_value = match value {
                 ParametersType::bool(v) => Value::Bool(v),
+                ParametersType::i16(v) => Value::Number(v.into()),
                 ParametersType::i32(v) => Value::Number(v.into()),
+                ParametersType::i64(v) => Value::Number(v.into()),
+                ParametersType::u8(v) => Value::Number(v.into()),
+                ParametersType::u16(v) => Value::Number(v.into()),
                 ParametersType::u32(v) => Value::Number(v.into()),
+                ParametersType::u64(v) => Value::Number(v.into()),
+                ParametersType::f32(v) => Value::Number(serde_json::Number::from_f64(v as f64).unwrap()),
+                ParametersType::f64(v) => Value::Number(serde_json::Number::from_f64(v).unwrap()),
                 ParametersType::VecI32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
                 ParametersType::VecU32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
                 ParametersType::usize(v) => Value::Number((v as u64).into()),
