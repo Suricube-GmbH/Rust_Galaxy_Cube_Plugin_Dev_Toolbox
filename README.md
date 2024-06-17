@@ -28,3 +28,7 @@ The few functions that are currently implement are :
 
 - ```add_message_to_user(message : String , json_to_follow : String) -> String``` : Take a JSON string made with the *parameters_map_to_json*  function and add a message of the user to return a JSON request that will make the firmware send a message to the user.
 
+- ```actor_function_request( actor_name: String, function_name: String, function_parameters_map: BTreeMap<String, ParametersType>) -> String ``` : Take a map that represent the parameters of a function and make a function request to send at the firmware that will make execute the function to the target actor.
+
+- ```add_actor_function_request(actor_name: String, function_name: String, function_parameters_map: BTreeMap<String, ParametersType>, json_to_follow: String) -> String``` : Take a map that represent the parameters of a function and make a function request to send at the firmware that will make execute the function to the target actor. All of this is in complement of the other json instructions.
+
