@@ -26,7 +26,36 @@ pub fn parameters_json_to_map(json_input: &String) -> BTreeMap<String, Parameter
     let json_value: Value = from_str(&json_input).unwrap();
     let mut map_result: BTreeMap<String, ParametersType> = BTreeMap::new();
 
-    if let Some(actor_desc) = json_value.get("actor_desc") {
+    if let Some(actor_desc) = json_value.get("parameters") {
+        if let Some(actor_desc_map) = actor_desc.as_object() {
+            for (key, value) in actor_desc_map {
+                let param = match value {
+                    Value::Bool(bool) => ParametersType::bool(*bool),
+                    Value::Number(num) if num.is_u64() => ParametersType::u64(num.as_u64().unwrap()),
+                    Value::Number(num) if num.is_i64() => ParametersType::i64(num.as_i64().unwrap()),
+                    Value::Number(num) if num.is_f64() => ParametersType::f64(num.as_f64().unwrap()),
+                    Value::Array(arr) if arr.iter().all(|x| x.is_u64()) => ParametersType::VecU32(
+                        arr.iter().map(|x| x.as_u64().unwrap() as u32).collect(),
+                    ),
+                    Value::Array(arr) if arr.iter().all(|x| x.is_i64()) => ParametersType::VecI32(
+                        arr.iter().map(|x| x.as_i64().unwrap() as i32).collect(),
+                    ),
+                    Value::String(s) => ParametersType::String(s.clone()),
+                    _ => continue,
+                };
+                map_result.insert(key.clone(), param);
+            }
+        }
+    }
+
+    map_result
+}
+
+pub fn virtual_parameters_json_to_map(json_input: &String) -> BTreeMap<String, ParametersType> {
+    let json_value: Value = from_str(&json_input).unwrap();
+    let mut map_result: BTreeMap<String, ParametersType> = BTreeMap::new();
+
+    if let Some(actor_desc) = json_value.get("virtual_parameters") {
         if let Some(actor_desc_map) = actor_desc.as_object() {
             for (key, value) in actor_desc_map {
                 let param = match value {
