@@ -142,7 +142,34 @@ pub fn parameters_map_to_json(map_input: BTreeMap<String, ParametersType>) -> St
     }
     let desc = to_string(&Value::Object(json_map)).unwrap();
 
-    format!("{{\"actor_desc\" : {}}}", desc).to_string()
+    format!("{{\"parameters\" : {}}}", desc).to_string()
+}
+
+pub fn virtual_parameters_map_to_json(map_input: BTreeMap<String, ParametersType>) -> String {
+    let mut json_map = serde_json::Map::new();
+
+    for (key, value) in map_input {
+        let json_value = match value {
+            ParametersType::bool(v) => Value::Bool(v),
+            ParametersType::i16(v) => Value::Number(v.into()),
+            ParametersType::i32(v) => Value::Number(v.into()),
+            ParametersType::i64(v) => Value::Number(v.into()),
+            ParametersType::u8(v) => Value::Number(v.into()),
+            ParametersType::u16(v) => Value::Number(v.into()),
+            ParametersType::u32(v) => Value::Number(v.into()),
+            ParametersType::u64(v) => Value::Number(v.into()),
+            ParametersType::f32(v) => Value::Number(serde_json::Number::from_f64(v as f64).unwrap()),
+            ParametersType::f64(v) => Value::Number(serde_json::Number::from_f64(v).unwrap()),
+            ParametersType::VecI32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
+            ParametersType::VecU32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
+            ParametersType::usize(v) => Value::Number((v as u64).into()),
+            ParametersType::String(v) => Value::String(v),
+        };
+        json_map.insert(key, json_value);
+    }
+    let desc = to_string(&Value::Object(json_map)).unwrap();
+
+    format!("{{\"virtual_parameters\" : {}}}", desc).to_string()
 }
 
 pub fn message_to_user(message: String) -> String {
