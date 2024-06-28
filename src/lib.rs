@@ -12,7 +12,7 @@ pub enum ParametersType {
     i64(i64),
     u8(u8),
     u16(u16),
-    u32(u32),   
+    u32(u32),
     u64(u64),
     f32(f32),
     f64(f64),
@@ -24,10 +24,10 @@ pub enum ParametersType {
 
 pub fn get_actor_name(json_input: &String) -> String {
     let json_value: Value = from_str(&json_input).unwrap();
-    if let Some(actor_name) = json_value.get("actor_name"){
-        return actor_name.to_string()
+    if let Some(actor_name) = json_value.get("actor_name") {
+        return actor_name.to_string();
     } else {
-        return String::new()
+        return String::new();
     }
 }
 
@@ -40,9 +40,15 @@ pub fn parameters_json_to_map(json_input: &String) -> BTreeMap<String, Parameter
             for (key, value) in actor_desc_map {
                 let param = match value {
                     Value::Bool(bool) => ParametersType::bool(*bool),
-                    Value::Number(num) if num.is_u64() => ParametersType::u64(num.as_u64().unwrap()),
-                    Value::Number(num) if num.is_i64() => ParametersType::i64(num.as_i64().unwrap()),
-                    Value::Number(num) if num.is_f64() => ParametersType::f64(num.as_f64().unwrap()),
+                    Value::Number(num) if num.is_u64() => {
+                        ParametersType::u64(num.as_u64().unwrap())
+                    }
+                    Value::Number(num) if num.is_i64() => {
+                        ParametersType::i64(num.as_i64().unwrap())
+                    }
+                    Value::Number(num) if num.is_f64() => {
+                        ParametersType::f64(num.as_f64().unwrap())
+                    }
                     Value::Array(arr) if arr.iter().all(|x| x.is_u64()) => ParametersType::VecU32(
                         arr.iter().map(|x| x.as_u64().unwrap() as u32).collect(),
                     ),
@@ -69,9 +75,15 @@ pub fn virtual_parameters_json_to_map(json_input: &String) -> BTreeMap<String, P
             for (key, value) in actor_desc_map {
                 let param = match value {
                     Value::Bool(bool) => ParametersType::bool(*bool),
-                    Value::Number(num) if num.is_u64() => ParametersType::u64(num.as_u64().unwrap()),
-                    Value::Number(num) if num.is_i64() => ParametersType::i64(num.as_i64().unwrap()),
-                    Value::Number(num) if num.is_f64() => ParametersType::f64(num.as_f64().unwrap()),
+                    Value::Number(num) if num.is_u64() => {
+                        ParametersType::u64(num.as_u64().unwrap())
+                    }
+                    Value::Number(num) if num.is_i64() => {
+                        ParametersType::i64(num.as_i64().unwrap())
+                    }
+                    Value::Number(num) if num.is_f64() => {
+                        ParametersType::f64(num.as_f64().unwrap())
+                    }
                     Value::Array(arr) if arr.iter().all(|x| x.is_u64()) => ParametersType::VecU32(
                         arr.iter().map(|x| x.as_u64().unwrap() as u32).collect(),
                     ),
@@ -98,9 +110,15 @@ pub fn arguments_json_to_map(json_input: &String) -> BTreeMap<String, Parameters
             for (key, value) in actor_desc_map {
                 let param = match value {
                     Value::Bool(bool) => ParametersType::bool(*bool),
-                    Value::Number(num) if num.is_u64() => ParametersType::u64(num.as_u64().unwrap()),
-                    Value::Number(num) if num.is_i64() => ParametersType::i64(num.as_i64().unwrap()),
-                    Value::Number(num) if num.is_f64() => ParametersType::f64(num.as_f64().unwrap()),
+                    Value::Number(num) if num.is_u64() => {
+                        ParametersType::u64(num.as_u64().unwrap())
+                    }
+                    Value::Number(num) if num.is_i64() => {
+                        ParametersType::i64(num.as_i64().unwrap())
+                    }
+                    Value::Number(num) if num.is_f64() => {
+                        ParametersType::f64(num.as_f64().unwrap())
+                    }
                     Value::Array(arr) if arr.iter().all(|x| x.is_u64()) => ParametersType::VecU32(
                         arr.iter().map(|x| x.as_u64().unwrap() as u32).collect(),
                     ),
@@ -131,7 +149,9 @@ pub fn parameters_map_to_json(map_input: BTreeMap<String, ParametersType>) -> St
             ParametersType::u16(v) => Value::Number(v.into()),
             ParametersType::u32(v) => Value::Number(v.into()),
             ParametersType::u64(v) => Value::Number(v.into()),
-            ParametersType::f32(v) => Value::Number(serde_json::Number::from_f64(v as f64).unwrap()),
+            ParametersType::f32(v) => {
+                Value::Number(serde_json::Number::from_f64(v as f64).unwrap())
+            }
             ParametersType::f64(v) => Value::Number(serde_json::Number::from_f64(v).unwrap()),
             ParametersType::VecI32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
             ParametersType::VecU32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
@@ -143,6 +163,42 @@ pub fn parameters_map_to_json(map_input: BTreeMap<String, ParametersType>) -> St
     let desc = to_string(&Value::Object(json_map)).unwrap();
 
     format!("{{\"parameters\" : {}}}", desc).to_string()
+}
+
+pub fn add_parameters_map_to_json(
+    map_input: BTreeMap<String, ParametersType>,
+    json_to_follow: String,
+) -> String {
+    let mut json_value: Value = from_str(&json_to_follow).unwrap();
+
+    let mut json_map = serde_json::Map::new();
+    for (key, value) in map_input {
+        let json_value = match value {
+            ParametersType::bool(v) => Value::Bool(v),
+            ParametersType::i16(v) => Value::Number(v.into()),
+            ParametersType::i32(v) => Value::Number(v.into()),
+            ParametersType::i64(v) => Value::Number(v.into()),
+            ParametersType::u8(v) => Value::Number(v.into()),
+            ParametersType::u16(v) => Value::Number(v.into()),
+            ParametersType::u32(v) => Value::Number(v.into()),
+            ParametersType::u64(v) => Value::Number(v.into()),
+            ParametersType::f32(v) => {
+                Value::Number(serde_json::Number::from_f64(v as f64).unwrap())
+            }
+            ParametersType::f64(v) => Value::Number(serde_json::Number::from_f64(v).unwrap()),
+            ParametersType::VecI32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
+            ParametersType::VecU32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
+            ParametersType::usize(v) => Value::Number((v as u64).into()),
+            ParametersType::String(v) => Value::String(v),
+        };
+        json_map.insert(key, json_value);
+    }
+
+    if let Value::Object(ref mut map) = json_value {
+        map.insert("parameters".to_string(), Value::Object(json_map));
+    }
+
+    to_string(&json_value).unwrap()
 }
 
 pub fn virtual_parameters_map_to_json(map_input: BTreeMap<String, ParametersType>) -> String {
@@ -158,7 +214,9 @@ pub fn virtual_parameters_map_to_json(map_input: BTreeMap<String, ParametersType
             ParametersType::u16(v) => Value::Number(v.into()),
             ParametersType::u32(v) => Value::Number(v.into()),
             ParametersType::u64(v) => Value::Number(v.into()),
-            ParametersType::f32(v) => Value::Number(serde_json::Number::from_f64(v as f64).unwrap()),
+            ParametersType::f32(v) => {
+                Value::Number(serde_json::Number::from_f64(v as f64).unwrap())
+            }
             ParametersType::f64(v) => Value::Number(serde_json::Number::from_f64(v).unwrap()),
             ParametersType::VecI32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
             ParametersType::VecU32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
@@ -170,6 +228,42 @@ pub fn virtual_parameters_map_to_json(map_input: BTreeMap<String, ParametersType
     let desc = to_string(&Value::Object(json_map)).unwrap();
 
     format!("{{\"virtual_parameters\" : {}}}", desc).to_string()
+}
+
+pub fn add_virtual_parameters_map_to_json(
+    map_input: BTreeMap<String, ParametersType>,
+    json_to_follow: String,
+) -> String {
+    let mut json_value: Value = from_str(&json_to_follow).unwrap();
+
+    let mut json_map = serde_json::Map::new();
+    for (key, value) in map_input {
+        let json_value = match value {
+            ParametersType::bool(v) => Value::Bool(v),
+            ParametersType::i16(v) => Value::Number(v.into()),
+            ParametersType::i32(v) => Value::Number(v.into()),
+            ParametersType::i64(v) => Value::Number(v.into()),
+            ParametersType::u8(v) => Value::Number(v.into()),
+            ParametersType::u16(v) => Value::Number(v.into()),
+            ParametersType::u32(v) => Value::Number(v.into()),
+            ParametersType::u64(v) => Value::Number(v.into()),
+            ParametersType::f32(v) => {
+                Value::Number(serde_json::Number::from_f64(v as f64).unwrap())
+            }
+            ParametersType::f64(v) => Value::Number(serde_json::Number::from_f64(v).unwrap()),
+            ParametersType::VecI32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
+            ParametersType::VecU32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
+            ParametersType::usize(v) => Value::Number((v as u64).into()),
+            ParametersType::String(v) => Value::String(v),
+        };
+        json_map.insert(key, json_value);
+    }
+
+    if let Value::Object(ref mut map) = json_value {
+        map.insert("virtual_parameters".to_string(), Value::Object(json_map));
+    }
+
+    to_string(&json_value).unwrap()
 }
 
 pub fn message_to_user(message: String) -> String {
@@ -203,7 +297,9 @@ pub fn actor_function_request(
                 ParametersType::u16(v) => Value::Number(v.into()),
                 ParametersType::u32(v) => Value::Number(v.into()),
                 ParametersType::u64(v) => Value::Number(v.into()),
-                ParametersType::f32(v) => Value::Number(serde_json::Number::from_f64(v as f64).unwrap()),
+                ParametersType::f32(v) => {
+                    Value::Number(serde_json::Number::from_f64(v as f64).unwrap())
+                }
                 ParametersType::f64(v) => Value::Number(serde_json::Number::from_f64(v).unwrap()),
                 ParametersType::VecI32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
                 ParametersType::VecU32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
@@ -245,7 +341,9 @@ pub fn add_actor_function_request(
                 ParametersType::u16(v) => Value::Number(v.into()),
                 ParametersType::u32(v) => Value::Number(v.into()),
                 ParametersType::u64(v) => Value::Number(v.into()),
-                ParametersType::f32(v) => Value::Number(serde_json::Number::from_f64(v as f64).unwrap()),
+                ParametersType::f32(v) => {
+                    Value::Number(serde_json::Number::from_f64(v as f64).unwrap())
+                }
                 ParametersType::f64(v) => Value::Number(serde_json::Number::from_f64(v).unwrap()),
                 ParametersType::VecI32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
                 ParametersType::VecU32(v) => Value::Array(v.into_iter().map(Value::from).collect()),
@@ -258,11 +356,14 @@ pub fn add_actor_function_request(
     };
 
     if let Value::Object(ref mut map) = json_value {
-        map.insert("function_component".to_string(), json!({
-            "actor_name": actor_name,
-            "function_name": function_name,
-            "function_parameters": function_parameters
-        }));
+        map.insert(
+            "function_component".to_string(),
+            json!({
+                "actor_name": actor_name,
+                "function_name": function_name,
+                "function_parameters": function_parameters
+            }),
+        );
     }
     to_string(&json_value).unwrap()
 }
@@ -294,7 +395,10 @@ mod tests {
 
         let mut map: BTreeMap<String, ParametersType> = BTreeMap::new();
         map.insert("oui".to_string(), ParametersType::String("Yes".to_string()));
-        map.insert("yes".to_string(), ParametersType::String("douze".to_string()));
+        map.insert(
+            "yes".to_string(),
+            ParametersType::String("douze".to_string()),
+        );
 
         let result = add_actor_function_request(
             "actor_name".to_string(),
@@ -310,5 +414,27 @@ mod tests {
         println!("{result_into_value}");
 
         println!("{}", to_string_pretty(&result_into_value).unwrap());
+    }
+
+    #[test]
+    fn add_parameters() {
+        let mut parameters_map: BTreeMap<String, ParametersType> = BTreeMap::new();
+        parameters_map.insert("oui".to_string(), ParametersType::u8(2));
+        parameters_map.insert("salute".to_string(), ParametersType::String("test".to_string()));
+        parameters_map.insert("test".to_string(), ParametersType::u8(8));
+
+        let mut virtual_parameters_map: BTreeMap<String, ParametersType> = BTreeMap::new();
+        virtual_parameters_map.insert("t".to_string(), ParametersType::u8(2));
+        virtual_parameters_map.insert("z".to_string(), ParametersType::String("test".to_string()));
+        virtual_parameters_map.insert("q".to_string(), ParametersType::u8(8));
+
+        println!("{:?}", parameters_map);
+        println!("{:?}", virtual_parameters_map);
+
+        let mut json: String = parameters_map_to_json(parameters_map);
+        json = add_virtual_parameters_map_to_json(virtual_parameters_map, json);
+        
+        let json_value = to_string_pretty(&from_str::<Value>(&json).unwrap()).unwrap();
+        println!("{}",json_value);
     }
 }
