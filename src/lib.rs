@@ -12,7 +12,7 @@ pub enum ParametersType {
     i64(i64),
     u8(u8),
     u16(u16),
-    u32(u32),
+    u32(u32),   
     u64(u64),
     f32(f32),
     f64(f64),
@@ -20,6 +20,15 @@ pub enum ParametersType {
     VecU32(Vec<u32>),
     usize(usize),
     String(String),
+}
+
+pub fn get_actor_name(json_input: &String) -> String {
+    let json_value: Value = from_str(&json_input).unwrap();
+    if let Some(actor_name) = json_value.get("actor_name"){
+        return actor_name.to_string()
+    } else {
+        return String::new()
+    }
 }
 
 pub fn parameters_json_to_map(json_input: &String) -> BTreeMap<String, ParametersType> {
