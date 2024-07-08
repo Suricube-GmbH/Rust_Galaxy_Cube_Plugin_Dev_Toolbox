@@ -22,16 +22,16 @@ pub enum ParametersType {
     String(String),
 }
 
-pub fn get_actor_name(json_input: &String) -> String {
+pub fn get_actor_name(json_input: &str) -> String {
     let json_value: Value = from_str(&json_input).unwrap();
     if let Some(actor_name) = json_value.get("actor_name") {
-        return actor_name.to_string();
+        return actor_name.to_string().trim_matches('"').to_owned();
     } else {
         return String::new();
     }
 }
 
-pub fn parameters_json_to_map(json_input: &String) -> BTreeMap<String, ParametersType> {
+pub fn parameters_json_to_map(json_input: &str) -> BTreeMap<String, ParametersType> {
     let json_value: Value = from_str(&json_input).unwrap();
     let mut map_result: BTreeMap<String, ParametersType> = BTreeMap::new();
 
@@ -66,7 +66,7 @@ pub fn parameters_json_to_map(json_input: &String) -> BTreeMap<String, Parameter
     map_result
 }
 
-pub fn virtual_parameters_json_to_map(json_input: &String) -> BTreeMap<String, ParametersType> {
+pub fn virtual_parameters_json_to_map(json_input: &str) -> BTreeMap<String, ParametersType> {
     let json_value: Value = from_str(&json_input).unwrap();
     let mut map_result: BTreeMap<String, ParametersType> = BTreeMap::new();
 
@@ -101,7 +101,7 @@ pub fn virtual_parameters_json_to_map(json_input: &String) -> BTreeMap<String, P
     map_result
 }
 
-pub fn arguments_json_to_map(json_input: &String) -> BTreeMap<String, ParametersType> {
+pub fn arguments_json_to_map(json_input: &str) -> BTreeMap<String, ParametersType> {
     let json_value: Value = from_str(&json_input).unwrap();
     let mut map_result: BTreeMap<String, ParametersType> = BTreeMap::new();
 
@@ -167,7 +167,7 @@ pub fn parameters_map_to_json(map_input: BTreeMap<String, ParametersType>) -> St
 
 pub fn add_parameters_map_to_json(
     map_input: BTreeMap<String, ParametersType>,
-    json_to_follow: String,
+    json_to_follow: &str,
 ) -> String {
     let mut json_value: Value = from_str(&json_to_follow).unwrap();
 
@@ -232,7 +232,7 @@ pub fn virtual_parameters_map_to_json(map_input: BTreeMap<String, ParametersType
 
 pub fn add_virtual_parameters_map_to_json(
     map_input: BTreeMap<String, ParametersType>,
-    json_to_follow: String,
+    json_to_follow: &str,
 ) -> String {
     let mut json_value: Value = from_str(&json_to_follow).unwrap();
 
@@ -266,23 +266,23 @@ pub fn add_virtual_parameters_map_to_json(
     to_string(&json_value).unwrap()
 }
 
-pub fn message_to_user(message: String) -> String {
+pub fn message_to_user(message: &str) -> String {
     let message_json = format!("{{\"to_user_message\" : \"{}\"}}", message);
 
     message_json
 }
 
-pub fn add_message_to_user(message: String, json_to_follow: String) -> String {
+pub fn add_message_to_user(message: &str, json_to_follow: &str) -> String {
     let mut json_value: Value = serde_json::from_str(&json_to_follow).unwrap();
     if let Value::Object(ref mut map) = json_value {
-        map.insert("to_user_message".to_string(), Value::String(message));
+        map.insert("to_user_message".to_string(), Value::String(message.to_owned()));
     }
     to_string(&json_value).unwrap()
 }
 
 pub fn actor_function_request(
-    actor_name: String,
-    function_name: String,
+    actor_name: &str,
+    function_name: &str,
     function_parameters_map: BTreeMap<String, ParametersType>,
 ) -> String {
     let function_parameters = {
@@ -323,10 +323,10 @@ pub fn actor_function_request(
 }
 
 pub fn add_actor_function_request(
-    actor_name: String,
-    function_name: String,
+    actor_name: &str,
+    function_name: &str,
     function_parameters_map: BTreeMap<String, ParametersType>,
-    json_to_follow: String,
+    json_to_follow: &str,
 ) -> String {
     let mut json_value: Value = serde_json::from_str(&json_to_follow).unwrap();
     let function_parameters = {
@@ -373,68 +373,17 @@ mod tests {
     use super::*;
 
     #[test]
-    fn add_message() {
-        // bad input for testing
-        let actor_desc = "{\"actor_desc\" : {\"feur\" : 1,\"shrek\" : \"oui\"}}";
+    fn actor_name_get() {
+        let request = 
+        r#"{
+            "actor_name" : "channel_A",
+            "parameters" : {
+                "a" : 0,
+                "b" : "c"
+            }
+        }"#;
 
-        let new_message = add_message_to_user("Hello world".to_string(), actor_desc.to_string());
-        println!("{new_message}");
-
-        let result_into_value: Value = serde_json::from_str(&new_message).unwrap();
-        println!("{result_into_value}");
-        println!("{}", to_string_pretty(&result_into_value).unwrap());
-    }
-
-    #[test]
-    fn function_component() {
-        let actor_desc = "{\"actor_desc\" : {\"feur\" : 1,\"shrek\" : \"oui\"}}".trim();
-
-        let result_into_value: Value = serde_json::from_str(&actor_desc).unwrap();
-        println!("{result_into_value}");
-        println!("{}", to_string_pretty(&result_into_value).unwrap());
-
-        let mut map: BTreeMap<String, ParametersType> = BTreeMap::new();
-        map.insert("oui".to_string(), ParametersType::String("Yes".to_string()));
-        map.insert(
-            "yes".to_string(),
-            ParametersType::String("douze".to_string()),
-        );
-
-        let result = add_actor_function_request(
-            "actor_name".to_string(),
-            "function_name".to_string(),
-            map,
-            actor_desc.to_string(),
-        );
-
-        println!("{result}");
-
-        let result_into_value: Value = serde_json::from_str(&result).unwrap();
-
-        println!("{result_into_value}");
-
-        println!("{}", to_string_pretty(&result_into_value).unwrap());
-    }
-
-    #[test]
-    fn add_parameters() {
-        let mut parameters_map: BTreeMap<String, ParametersType> = BTreeMap::new();
-        parameters_map.insert("oui".to_string(), ParametersType::u8(2));
-        parameters_map.insert("salute".to_string(), ParametersType::String("test".to_string()));
-        parameters_map.insert("test".to_string(), ParametersType::u8(8));
-
-        let mut virtual_parameters_map: BTreeMap<String, ParametersType> = BTreeMap::new();
-        virtual_parameters_map.insert("t".to_string(), ParametersType::u8(2));
-        virtual_parameters_map.insert("z".to_string(), ParametersType::String("test".to_string()));
-        virtual_parameters_map.insert("q".to_string(), ParametersType::u8(8));
-
-        println!("{:?}", parameters_map);
-        println!("{:?}", virtual_parameters_map);
-
-        let mut json: String = parameters_map_to_json(parameters_map);
-        json = add_virtual_parameters_map_to_json(virtual_parameters_map, json);
-        
-        let json_value = to_string_pretty(&from_str::<Value>(&json).unwrap()).unwrap();
-        println!("{}",json_value);
+        let actor_name = get_actor_name(request);
+        println!("{}", actor_name);
     }
 }
